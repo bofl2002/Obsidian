@@ -1,4 +1,4 @@
-[[Teknologi]]
+[[IT-Netværk]]
 
 **
 

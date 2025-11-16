@@ -1,4 +1,5 @@
-[[Teknologi]]
+[[IT-Netværk]]
+
 
 IP-adresser
 Subnetmaske

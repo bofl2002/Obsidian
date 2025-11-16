@@ -1,4 +1,5 @@
-[[Teknologi]]
+[[Virtualisering]]
+
 
 **
 

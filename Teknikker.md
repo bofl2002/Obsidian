@@ -2,6 +2,58 @@
 
 Teknikker er generiske beskrivelser af, hvad vi gør, og hvad vi ønsker at opnå med det. F.eks. hvis man vil lave et diagram, der på et konceptuelt plan beskriver de informationer, som skal behandles i systemet.
 
+Teknikken skal indeholde:
+- Input 
+	· brugere
+	· virksomheden
+	· analyser
+	· diagrammer
+	· beskrivelser
+- Formål
+	- et overblik over...
+	- at finde sammenhænge mellem...
+	- eks. 
+		- for at skabe et overblik over hvordan en interaktion med systemet bevæger sig gennem koden
+		- for at skabe overblik over, hvad der skaber værdi for virksomheden
+		- for at finde sammenhænge mellem informationer i systemet
+- Aktivitet
+	- spørge
+	- observere
+	- lave en generisk beskrivelse
+	- analysere
+	- tegne et diagram
+	- tegne en overordnet skitse
+	- lave en et skema
+	- skrive en liste
+
+**
+
+**Intern konsistens:
+
+Input → understøtter → Aktivitet → producerer → Formål  
+  
+
+Alle tre elementer skal hænge logisk sammen.
+
+**Ekstern konsistens:
+
+Teknik og formål → matcher → Teknik og input  
+**
+
+**Kvalitetssikring**
+
+Kvalitetssikring Når du har beskrevet din teknik, kan du således benytte følgende kriterier til at kvalitetssikre teknikken:
+
+· Er teknikken generisk beskrevet?
+· Er det tydeligt hvilket input din teknik skal tage afsæt i?
+· Er det klart, hvilken aktivitet, der skal udføres i teknikken?
+· Er der er klart formål med teknikken?
+
+og i forhold til sporbarhed
+· Kan du redegøre for hvor inputtet kommer fra?
+
+· Kan du redegøre for sammenhængen mellem teknikkens formål og inputtet i den efterfølgende teknik?
+
 En **teknik** er en **generisk beskrivelse** af:
 
 - **Hvad** vi gør

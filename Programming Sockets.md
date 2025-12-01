@@ -108,8 +108,8 @@ class SocketServer
     static void Main(string[] args)
     {
         // Definer host og port
-        string host = "127.0.0.1";
-        int port = 12345;
+	        string host = "127.0.0.1";
+	        int port = 12345;
         
         // Opret et TCP/IP socket
         Socket serverSocket = new Socket(AddressFamily.InterNetwork, 

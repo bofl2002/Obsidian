@@ -8,16 +8,35 @@
         "type": "tabs",
         "children": [
           {
-            "id": "878c6ef990ddec34",
+            "id": "e691ffacbc92bdd6",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "Threading.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Threading"
+            }
+          },
+          {
+            "id": "64737eaec27a0a29",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Threading.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Threading"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -162,9 +181,28 @@
       "bases:Create new base": false
     }
   },
-  "active": "878c6ef990ddec34",
+  "active": "64737eaec27a0a29",
   "lastOpenFiles": [
+    "Software Deployment.md",
     "Threading.md",
+    "Pasted image 20251130151609.png",
+    "Clean Architecture.md",
+    "En god strategi.md",
+    "Pasted image 20251126123629.png",
+    "Pasted image 20251126123602.png",
+    "ASDM.md",
+    "Tactical DDD.md",
+    "Systemudviklingsmetoder.md",
+    "Processmodeller.md",
+    "Teknikker.md",
+    "Pasted image 20251125163245.png",
+    "Pasted image 20251125162533.png",
+    "Asynkron programmering.md",
+    "Untitled.canvas",
+    "RAD.md",
+    "Teknologi.md",
+    "Blazor.md",
+    "Maintanence.md",
     "Programming Sockets.md",
     "Linux.md",
     "Docker.md",
@@ -177,19 +215,6 @@
     "Protokoller.md",
     "Frames.md",
     "Talsystemer.md",
-    "IP-adresser.md",
-    "IT-Netværk.md",
-    "Entity Framework & Identity.md",
-    "HTML.md",
-    "C-Sharp.md",
-    "Secure by design.md",
-    "Typer af Systemudv. metoder.md",
-    "Systemudviklingsmetoder.md",
-    "Implementering.md",
-    "Fokusområder.md",
-    "FDD.md",
-    "Domænemodel.md",
-    "OSI model.md",
     "Pasted image 20251014121012.png",
     "Pasted image 20251014120916.png",
     "Untitled",

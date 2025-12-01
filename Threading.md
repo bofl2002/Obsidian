@@ -1762,3 +1762,432 @@ Task.Run(() =>
 });
 
 Dispatcher er essentiel i WPF for at sikre, at UI-opdateringer sker korrekt uden at bryde trådbegrænsningerne.
+
+# Master Threads og Tasks i C-Sharp#
+
+Lad mig give dig en omfattende guide til threads og tasks i C#!
+
+## Tasks vs Threads
+
+**Tasks** er den moderne og anbefalede måde at håndtere asynkron og parallel programmering i C#. De er bygget oven på thread pool'en og giver bedre ressourcehåndtering.
+
+**Threads** giver lavere-niveau kontrol, men kræver mere manuel håndtering og er tungere at oprette.
+
+## 1. Tasks - Den Moderne Tilgang
+
+### Grundlæggende Task Oprettelse
+
+```csharp
+// Simpel task
+Task task = Task.Run(() => 
+{
+    Console.WriteLine("Kører i baggrunden");
+});
+
+// Vente på task er færdig
+task.Wait();
+
+// Task med returværdi
+Task<int> taskMedResultat = Task.Run(() => 
+{
+    return 42;
+});
+
+int resultat = taskMedResultat.Result; // Blokerer indtil færdig
+```
+
+### Async/Await - Den Elegante Måde
+
+```csharp
+public async Task<string> HentDataAsync()
+{
+    await Task.Delay(1000); // Simulerer netværkskald
+    return "Data hentet!";
+}
+
+// Brug af async metode
+public async Task ExecuteAsync()
+{
+    string data = await HentDataAsync();
+    Console.WriteLine(data);
+}
+```
+
+### Task.WhenAll og Task.WhenAny
+
+```csharp
+// Kør flere tasks parallelt
+public async Task ParallelOperationerAsync()
+{
+    var task1 = HentBrugerAsync(1);
+    var task2 = HentBrugerAsync(2);
+    var task3 = HentBrugerAsync(3);
+    
+    // Venter på alle er færdige
+    var resultater = await Task.WhenAll(task1, task2, task3);
+    
+    // Venter på første der bliver færdig
+    var førsteFærdig = await Task.WhenAny(task1, task2, task3);
+}
+```
+
+## 2. Threads - Lavere Niveau Kontrol
+
+### Oprettelse af Threads
+
+```csharp
+// Simpel thread
+Thread thread = new Thread(() => 
+{
+    Console.WriteLine("Kører i separat thread");
+});
+
+thread.Start();
+thread.Join(); // Venter på thread er færdig
+
+// Thread med parameter
+Thread threadMedParam = new Thread((object obj) => 
+{
+    string navn = (string)obj;
+    Console.WriteLine($"Hej {navn}");
+});
+
+threadMedParam.Start("Peter");
+```
+
+### Thread Egenskaber
+
+```csharp
+Thread thread = new Thread(() => { /* arbejde */ });
+
+thread.IsBackground = true; // Background thread (dør når main thread slutter)
+thread.Priority = ThreadPriority.High; // Sæt prioritet
+thread.Name = "MinThread"; // Giv navn til debugging
+```
+
+## 3. Synkronisering
+
+### Lock - Simpel Synkronisering
+
+```csharp
+private object _lock = new object();
+private int _tæller = 0;
+
+public void IncrementTæller()
+{
+    lock (_lock)
+    {
+        _tæller++;
+    }
+}
+```
+
+### SemaphoreSlim - Begræns Samtidige Adgange
+
+```csharp
+private SemaphoreSlim _semaphore = new SemaphoreSlim(3); // Max 3 samtidige
+
+public async Task UdførBegrænsetAsync()
+{
+    await _semaphore.WaitAsync();
+    try
+    {
+        // Kun 3 kan være her samtidigt
+        await Task.Delay(1000);
+    }
+    finally
+    {
+        _semaphore.Release();
+    }
+}
+```
+
+### Monitor - Avanceret Synkronisering
+
+```csharp
+private object _lock = new object();
+
+public void BrugMonitor()
+{
+    Monitor.Enter(_lock);
+    try
+    {
+        // Kritisk sektion
+    }
+    finally
+    {
+        Monitor.Exit(_lock);
+    }
+}
+```
+
+## 4. Praktiske Mønstre
+
+### Producer-Consumer Pattern
+
+```csharp
+using System.Collections.Concurrent;
+
+BlockingCollection<int> queue = new BlockingCollection<int>();
+
+// Producer
+Task producer = Task.Run(() => 
+{
+    for (int i = 0; i < 10; i++)
+    {
+        queue.Add(i);
+        Thread.Sleep(100);
+    }
+    queue.CompleteAdding();
+});
+
+// Consumer
+Task consumer = Task.Run(() => 
+{
+    foreach (var item in queue.GetConsumingEnumerable())
+    {
+        Console.WriteLine($"Behandler: {item}");
+    }
+});
+
+await Task.WhenAll(producer, consumer);
+```
+
+### Parallel Programming
+
+```csharp
+// Parallel.For
+Parallel.For(0, 100, i => 
+{
+    Console.WriteLine($"Processing {i} på thread {Thread.CurrentThread.ManagedThreadId}");
+});
+
+// Parallel.ForEach
+var items = Enumerable.Range(0, 100);
+Parallel.ForEach(items, item => 
+{
+    // Behandl item
+});
+
+// PLINQ
+var resultater = items
+    .AsParallel()
+    .Where(x => x % 2 == 0)
+    .Select(x => x * x)
+    .ToList();
+```
+
+## 5. Cancellation Tokens
+
+```csharp
+public async Task LangKørendeOperationAsync(CancellationToken cancellationToken)
+{
+    for (int i = 0; i < 100; i++)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        
+        await Task.Delay(100, cancellationToken);
+        Console.WriteLine($"Iteration {i}");
+    }
+}
+
+// Brug
+var cts = new CancellationTokenSource();
+var task = LangKørendeOperationAsync(cts.Token);
+
+// Annuller efter 2 sekunder
+cts.CancelAfter(TimeSpan.FromSeconds(2));
+
+try
+{
+    await task;
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("Operation blev annulleret");
+}
+```
+
+## 6. Best Practices
+
+### ✅ Gør Dette:
+
+- Brug `async/await` til I/O-bound operationer
+- Brug `Task.Run` eller `Parallel` til CPU-bound operationer
+- Brug `ConfigureAwait(false)` i biblioteker
+- Håndter exceptions korrekt med try-catch omkring await
+- Brug `CancellationToken` til lange operationer
+
+### ❌ Undgå Dette:
+
+- `Thread.Sleep()` i async metoder (brug `await Task.Delay()`)
+- `Task.Result` eller `.Wait()` (kan give deadlocks)
+- At starte for mange threads manuelt
+- At ignorere exceptions i tasks
+
+### ConfigureAwait Eksempel
+
+```csharp
+// I biblioteker
+public async Task<string> HentDataAsync()
+{
+    var data = await HttpClient.GetStringAsync(url).ConfigureAwait(false);
+    return data;
+}
+
+// I UI-applikationer (behøver ikke ConfigureAwait)
+private async void Button_Click(object sender, EventArgs e)
+{
+    var data = await HentDataAsync();
+    textBox.Text = data; // Skal køre på UI thread
+}
+```
+
+## 7. Fejlhåndtering
+
+```csharp
+public async Task FejlhåndteringAsync()
+{
+    try
+    {
+        await Task.Run(() => throw new Exception("Fejl!"));
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Fanget fejl: {ex.Message}");
+    }
+}
+
+// Flere tasks med fejlhåndtering
+public async Task HåndterFlereTasksAsync()
+{
+    var tasks = new List<Task>();
+    
+    for (int i = 0; i < 5; i++)
+    {
+        tasks.Add(Task.Run(() => { /* arbejde */ }));
+    }
+    
+    try
+    {
+        await Task.WhenAll(tasks);
+    }
+    catch
+    {
+        // Hvis en task fejler, tjek alle
+        foreach (var task in tasks)
+        {
+            if (task.IsFaulted)
+            {
+                Console.WriteLine($"Task fejlede: {task.Exception?.Message}");
+            }
+        }
+    }
+}
+```
+
+# Task Planlægning
+
+Når du awaiter en task, bliver tasken planlagt på en thread pool, der administreres af .NET runtime. Thread poolen vedligeholder en pulje af arbejder-threads, som kan genbruges til forskellige tasks, hvilket reducerer overhead'en ved at oprette og destruere threads.
+
+1. **Start af Tasken**: Når du kalder en asynkron metode, starter den med at køre på main thread'en, indtil den rammer et `await` keyword.
+    
+2. **Awaiting af Tasken**: Ved mødet med et `await` bliver metodens eksekvering sat på pause, og kontrollen returneres til den kaldende metode eller main thread'en. Den awaitede task overdrages til en thread pool thread.
+    
+3. **Thread Pool Eksekvering**: Tasken kører på en thread fra thread poolen. Hvis tasken involverer I/O operationer (f.eks. filadgang, web-forespørgsler), bliver det egentlige I/O arbejde overdraget til OS'et, og thread'en frigøres til at udføre andre tasks, mens den venter på at I/O'en bliver færdig.
+    
+
+## Continuation (Fortsættelse)
+
+Når den awaitede task er færdig, bliver continuation'en (den resterende kode efter `await`) planlagt tilbage til den oprindelige kontekst, typisk main thread'en for UI-applikationer, eller en thread pool thread for server-applikationer.
+
+1. **Task Fuldførelse**: Når baggrundstasken er færdig, planlægger thread poolen fortsættelsen af den async metode.
+    
+2. **Genoptagelse af Eksekvering**: Den async metode genoptager eksekveringen fra det sted, den blev forladt efter `await` keywordet, nu med resultatet af den awaitede task.
+
+
+![[Pasted image 20251130151609.png]]
+
+# Asynkron Programmering i C#
+
+## Hovedpunkter
+
+
+**Threads (Tråde)** er de grundlæggende eksekveringsenheder i en proces. De tillader samtidig eksekvering, men direkte håndtering kan være kompleks og ressourcekrævende.
+
+**Tasks (Opgaver)** tilbyder en højere-niveau abstraktion over threads og er nemmere at håndtere. De repræsenterer asynkrone operationer og håndterer meget af kompleksiteten ved thread-håndtering.
+
+**Async/Await-mønsteret** gør det muligt at skrive asynkron kode, der ser ud og opfører sig som synkron kode, hvilket gør koden nemmere at læse og vedligeholde.
+
+## Hvordan det Virker i Baggrunden
+
+Når du awaiter en task, sker følgende:
+
+1. **Start**: Metoden kører på main thread indtil den møder `await`
+2. **Pause**: Eksekveringen sættes på pause og kontrollen returneres
+3. **Thread Pool**: Tasken køres på en thread fra thread poolen. Ved I/O-operationer frigives thread'en til andet arbejde
+4. **Fortsættelse**: Når tasken er færdig, genoptages eksekveringen efter `await`-punktet
+
+## Tidssammenligning
+
+**Synkron eksekvering**: 5 opgaver à 2 sekunder = 10 sekunder samlet **Asynkron eksekvering**: 5 opgaver samtidigt = 2 sekunder samlet
+
+Asynkron programmering reducerer markant den tid, der er nødvendig for at fuldføre flere opgaver.
+
+## Anvendelse i Praksis
+
+Dokumentet beskriver hvordan asynkron programmering bruges i kritiske miljøer til:
+
+- **API-datafetching**: Minimerer ventetid ved netværksforespørgsler
+- **Database-operationer**: Håndterer flere forespørgsler samtidigt
+- **Filbehandling**: Undgår blokering ved I/O-operationer
+- **UI-responsivitet**: Holder brugergrænsefladen interaktiv
+- **Parallelle operationer**: Udfører uafhængige opgaver effektivt
+
+## Resultater
+
+Ved at bruge asynkron programmering opnås:
+
+- Øget responsivitet selv under høj belastning
+- Effektiv ressourceudnyttelse
+- Reduceret latenstid
+- Forbedret pålidelighed og ydeevne
+
+# Task Parallel Library (TPL)
+
+**Task Parallel Library (TPL)** automatiserer opdelingen af For-loops og ForEach-loops i mindre dele til asynkron behandling.
+
+## Parallel.For og Parallel.ForEach
+
+Disse metoder giver dig mulighed for at køre iterationer parallelt ved at udnytte flere threads til at forbedre ydeevnen.
+
+## Effektivitet
+
+Ved at opdele opgaver i mindre dele og køre dem på baggrundstråde kan du maksimere maskinens kapacitet og reducere spildtid.
+
+---
+
+### Praktisk Eksempel
+
+```csharp
+// Synkron loop - én iteration ad gangen
+for (int i = 0; i < 1000; i++)
+{
+    BehandlData(i);
+}
+
+// Parallel loop - flere iterationer samtidigt
+Parallel.For(0, 1000, i => 
+{
+    BehandlData(i);
+});
+
+// Parallel ForEach
+var items = new List<string> { "item1", "item2", "item3" };
+Parallel.ForEach(items, item => 
+{
+    BehandlItem(item);
+});
+```
+
+TPL fordeler automatisk arbejdet på tilgængelige CPU-kerner, hvilket gør det ideelt til CPU-intensive opgaver hvor hver iteration er uafhængig af de andre.
